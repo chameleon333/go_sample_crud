@@ -1,0 +1,42 @@
+version: '3' # composeファイルのバーション指定
+services:
+  go: # service名
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      DB_PORT: ${DB_PORT}
+    build:
+      context: .
+      dockerfile: ./docker/go/Dockerfile
+    tty: true # コンテナの起動永続化
+    volumes:
+      - .:/go/src/work # マウントディレクトリ指定
+    ports:
+      - "8080:8080" # Web Server
+      - "5050:5050" # delve用
+    # privileged: true # Delveに必要。本番環境では使うべきではない
+    # command: dlv debug --headless --api-version=2 --listen=:5050 --log
+
+  db:
+    image: mysql:5.7
+    container_name: db-host
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+      TZ: ${TZ}
+    # command: mysqld --skip-grant-tables --skip-networking --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    volumes:
+      - db-data:/var/lib/mysql
+      - ./docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./docker/db/sql:/docker-entrypoint-initdb.d
+    ports:
+      - ${DB_PORT}:3306
+
+
+volumes:
+  db-data:
