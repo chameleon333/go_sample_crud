@@ -1,0 +1,7 @@
+<h1>記事一覧</h1>
+
+<ur>
+    {{range .}}
+    <li><a href="/edit/{{.Title}}">{{.Title}}: {{printf "%s" .Body}}</a></li>
+    {{end}}
+</ur>

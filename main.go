@@ -76,12 +76,28 @@ func loadArticle(title string) (*Article, error) {
 	return &Article{ID: id, Title: title, Body: body}, nil
 }
 
-func renderTemplate(writer http.ResponseWriter, tmpl string, article *Article) {
+func loadAllArticle() []Article {
+	var articles []Article
+
+	db := gormConnect()
+	defer db.Close()
+
+	db.Order("created_at desc").Find(&articles)
+
+	return articles
+}
+
+func renderTemplate(writer http.ResponseWriter, tmpl string, article interface{}) {
 	t, _ := template.ParseFiles(tmpl + ".html")
 	err := t.Execute(writer, article)
 	if err != nil {
 		panic(err.Error())
 	}
+}
+
+func listHandler(writer http.ResponseWriter, r *http.Request) {
+	articles := loadAllArticle()
+	renderTemplate(writer, "list", articles)
 }
 
 func viewHandler(w http.ResponseWriter, r *http.Request, title string) {
@@ -113,10 +129,10 @@ func deleteHandler(w http.ResponseWriter, r *http.Request, title string) {
 	body := r.FormValue("body")
 	article := &Article{Title: title, Body: []byte(body)}
 	article.delete()
-	http.Redirect(w, r, "/view/"+title, http.StatusFound)
+	http.Redirect(w, r, "/list/", http.StatusFound)
 }
 
-var validPath = regexp.MustCompile("^/(edit|save|view|delete)/([a-zA-Z0-9]+)$")
+var validPath = regexp.MustCompile("^/(list|edit|save|view|delete)/([a-zA-Z0-9]+)$")
 
 func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -130,6 +146,7 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
 }
 
 func main() {
+	http.HandleFunc("/list/", listHandler)
 	http.HandleFunc("/view/", makeHandler(viewHandler))
 	http.HandleFunc("/edit/", makeHandler(editHandler))
 	http.HandleFunc("/save/", makeHandler(saveHandler))
