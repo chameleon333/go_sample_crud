@@ -1,7 +1,22 @@
 <h1>記事一覧</h1>
 
-<ur>
+<table border=1>
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Body</th>
+        <th>Created at</th>
+        <th>Updated at</th>
+    </tr>
     {{range .articles}}
-    <li><a href="/view/{{.Title}}">{{.Title}}: {{printf "%s" .Body}}</a></li>
+    <tr>
+        <td>{{.ID}}</td>
+        <td><a href="/view/{{.ID}}">{{.Title}}</a></td>
+        <td>{{printf "%s" .Body}}</td>
+        <td>{{.CreatedAt}}</td>
+        <td>{{.UpdatedAt}}</td>
+    </tr>
     {{end}}
-</ur>
+
+</table>
+<p><a href="/new">CREATE ARTICLE</a></p>

@@ -2,8 +2,9 @@
 
 <h1>{{.article.Title}}</h1>
 
-<p>[<a href="/edit/{{.article.Title}}">Edit</a>]</p>
-<p>[<a href="/delete/{{.article.Title}}" data-method="delete">Delete</a>]</p>
-
-<div>{{printf "%s" .article.Title}}</div>
+<h2>Body</h2>
 <div>{{printf "%s" .article.Body}}</div>
+
+<p>[<a href="/edit/{{.article.ID}}">Edit</a>]</p>
+<p>[<a href="/delete/{{.article.ID}}" data-method="delete">Delete</a>]</p>
+

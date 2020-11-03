@@ -1,11 +1,14 @@
-<h1>Editing {{.article.Title}}</h1>
+{{if .article.Title}}
+    <h1>Editing {{.article.Title}}</h1>
+    {{else}}
+    <h1>Creating</h1>
+{{end}}
 
-<!-- <form action="/save/{{.article.Title}}" method="POST"> -->
 <form action="/save" method="POST">
-    {{.article.Title}}
+    <div><input name="id" type="hidden" value="{{.article.ID}}"></div>
+    <div><input name="title" type="text" value="{{.article.Title}}"></div>
     <div>
-        <input name="title" type="hidden" value="{{.article.Title}}">
-        <textarea name="body" rows="20" cols="80">{{printf "%s" .article.Body}}</textarea>
+        <textarea name="body" rows="20" cols="80">{{if .article.Body}}{{printf "%s" .article.Body}}{{end}}</textarea>
     </div>
     <div>
         <input type="submit" value="Save">
