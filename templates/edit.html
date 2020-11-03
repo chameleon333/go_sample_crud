@@ -1,0 +1,13 @@
+<h1>Editing {{.article.Title}}</h1>
+
+<!-- <form action="/save/{{.article.Title}}" method="POST"> -->
+<form action="/save" method="POST">
+    {{.article.Title}}
+    <div>
+        <input name="title" type="hidden" value="{{.article.Title}}">
+        <textarea name="body" rows="20" cols="80">{{printf "%s" .article.Body}}</textarea>
+    </div>
+    <div>
+        <input type="submit" value="Save">
+    </div>
+</form>

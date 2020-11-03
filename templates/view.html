@@ -1,0 +1,9 @@
+<a href="/list/"><p>Top</p></a>
+
+<h1>{{.article.Title}}</h1>
+
+<p>[<a href="/edit/{{.article.Title}}">Edit</a>]</p>
+<p>[<a href="/delete/{{.article.Title}}" data-method="delete">Delete</a>]</p>
+
+<div>{{printf "%s" .article.Title}}</div>
+<div>{{printf "%s" .article.Body}}</div>

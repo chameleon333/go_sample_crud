@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"regexp"
 
+	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/jinzhu/gorm"
 	"github.com/kelseyhightower/envconfig"
@@ -145,11 +146,77 @@ func makeHandler(fn func(http.ResponseWriter, *http.Request, string)) http.Handl
 	}
 }
 
+func ListArticles(c *gin.Context) {
+	articles := loadAllArticle()
+	c.HTML(200, "list.html", gin.H{
+		"articles": articles,
+	})
+}
+
+func EditArticles(c *gin.Context) {
+	title := c.Param("title")
+	article, err := loadArticle(title)
+	if err != nil {
+		// リダイレクトする
+		c.Redirect(http.StatusNotFound, "404.html")
+		return
+	}
+	c.HTML(200, "edit.html", gin.H{
+		"article": article,
+	})
+}
+
+func SaveArticles(c *gin.Context) {
+	title := c.PostForm("title")
+	body := c.PostForm("body")
+	article := &Article{Title: title, Body: []byte(body)}
+	article.save()
+	c.Redirect(http.StatusSeeOther, "/list")
+}
+
+func DeleteArticle(c *gin.Context) {
+	title := c.Param("title")
+	db := gormConnect()
+	defer db.Close()
+	article := &Article{Title: title}
+	article.delete()
+	c.Redirect(http.StatusSeeOther, "/list")
+}
+
+func ViewArticles(c *gin.Context) {
+	title := c.Param("title")
+	article, err := loadArticle(title)
+	if err != nil {
+		// リダイレクトする
+		c.Redirect(http.StatusNotFound, "404.html")
+		return
+	}
+	c.HTML(200, "view.html", gin.H{
+		"article": article,
+	})
+}
+
 func main() {
-	http.HandleFunc("/list/", listHandler)
-	http.HandleFunc("/view/", makeHandler(viewHandler))
-	http.HandleFunc("/edit/", makeHandler(editHandler))
-	http.HandleFunc("/save/", makeHandler(saveHandler))
-	http.HandleFunc("/delete/", makeHandler(deleteHandler))
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	router := gin.Default()
+
+	router.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{
+			"message": "hello world",
+		})
+	})
+	router.LoadHTMLGlob("templates/*")
+	router.GET("/list", ListArticles)
+	router.GET("/view/:title", ViewArticles)
+	router.GET("/edit/:title", EditArticles)
+	router.GET("/delete/:title", DeleteArticle)
+	router.POST("/save", SaveArticles)
+
+	router.Run(":8080")
+
+	// http.HandleFunc("/list/", listHandler)
+	// http.HandleFunc("/view/", makeHandler(viewHandler))
+	// http.HandleFunc("/edit/", makeHandler(editHandler))
+	// http.HandleFunc("/save/", makeHandler(saveHandler))
+	// http.HandleFunc("/delete/", makeHandler(deleteHandler))
+	// log.Fatal(http.ListenAndServe(":8080", nil))
 }
