@@ -2,7 +2,8 @@ package models
 
 import (
 	"time"
-	"work/db"
+
+	"github.com/jinzhu/gorm"
 )
 
 // Article is struct
@@ -14,11 +15,10 @@ type Article struct {
 	UpdatedAt time.Time
 }
 
+var db gorm.DB
+
 func LoadArticle(id int) (*Article, error) {
 	var article Article
-
-	db := db.GormConnect()
-	defer db.Close()
 
 	db.First(&article, "id=?", id)
 
@@ -31,17 +31,12 @@ func LoadArticle(id int) (*Article, error) {
 func LoadAllArticle() []Article {
 	var articles []Article
 
-	db := db.GormConnect()
-	defer db.Close()
-
 	db.Order("created_at desc").Find(&articles)
 
 	return articles
 }
 
 func (article *Article) Save() {
-	db := db.GormConnect()
-	defer db.Close()
 	title := article.Title
 	body := article.Body
 
@@ -53,9 +48,6 @@ func (article *Article) Save() {
 }
 
 func (article *Article) Delete() {
-	db := db.GormConnect()
-	defer db.Close()
-
 	db.First(&article, "id=?", article.ID)
 	db.Delete(&article)
 }

@@ -1,10 +1,14 @@
 package main
 
 import (
+	"log"
 	"work/controllers"
+	"work/env"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/jinzhu/gorm"
+	"github.com/kelseyhightower/envconfig"
 )
 
 func SigninFormRoute(c *gin.Context) {
@@ -27,10 +31,27 @@ func Signin(c *gin.Context) {
 	// })
 }
 
+func init() {
+	var goenv env.Env
+	err := envconfig.Process("", &goenv)
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	PROTOCOL := "tcp(" + goenv.DB_HOST + ":" + goenv.DB_PORT + ")"
+	CONNECT := goenv.DB_USERNAME + ":" + goenv.DB_PASSWORD + "@" + PROTOCOL + "/" + goenv.DB_DATABASE
+	OPTION := "?parseTime=true&loc=Asia%2FTokyo"
+	db, err = gorm.Open(goenv.DB_CONNECTION, CONNECT+OPTION)
+	if err != nil {
+		panic(err)
+	}
+}
+
+var db *gorm.DB
+
 func main() {
 
 	router := gin.Default()
-	router.LoadHTMLGlob("templates/*")
+	router.LoadHTMLGlob("view/*/**")
 	router.GET("/new", controllers.NewArticles)
 	router.GET("/list", controllers.ListArticles)
 	router.GET("/view/:id", controllers.ViewArticles)
@@ -39,5 +60,8 @@ func main() {
 	router.POST("/save", controllers.SaveArticles)
 	router.GET("/signin", SigninFormRoute)
 	router.POST("/signin", Signin)
-	router.Run(":8080")
+	err := router.Run(":8080")
+	if err != nil {
+		log.Fatal(err.Error())
+	}
 }
