@@ -3,12 +3,11 @@ package main
 import (
 	"log"
 	"work/controllers"
-	"work/env"
+	"work/db"
+	"work/models"
 
 	"github.com/gin-gonic/gin"
 	_ "github.com/go-sql-driver/mysql"
-	"github.com/jinzhu/gorm"
-	"github.com/kelseyhightower/envconfig"
 )
 
 func SigninFormRoute(c *gin.Context) {
@@ -32,21 +31,9 @@ func Signin(c *gin.Context) {
 }
 
 func init() {
-	var goenv env.Env
-	err := envconfig.Process("", &goenv)
-	if err != nil {
-		log.Fatal(err.Error())
-	}
-	PROTOCOL := "tcp(" + goenv.DB_HOST + ":" + goenv.DB_PORT + ")"
-	CONNECT := goenv.DB_USERNAME + ":" + goenv.DB_PASSWORD + "@" + PROTOCOL + "/" + goenv.DB_DATABASE
-	OPTION := "?parseTime=true&loc=Asia%2FTokyo"
-	db, err = gorm.Open(goenv.DB_CONNECTION, CONNECT+OPTION)
-	if err != nil {
-		panic(err)
-	}
+	db.GormConnect()
+	db.DB.AutoMigrate(&models.User{}, &models.Article{})
 }
-
-var db *gorm.DB
 
 func main() {
 
