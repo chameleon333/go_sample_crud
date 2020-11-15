@@ -1,11 +1,12 @@
 <div>
-    <form action="/signin">
-        <h2>ログイン</h2>
+    <form action="/signup" method="post">
+        <h2>サインアップ</h2>
+        <p style="color:red">{{.Err}}</p>
         メールアドレス
         <input name="email" type="text" placeholder="Email address" required>
         パスワード
         <input name="password" type="text" placeholder="Email address" required>
         <br>
-        <button type="submit">ログイン</button>
+        <button type="submit">登録</button>
     </form>
 </div>
