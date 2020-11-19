@@ -5,6 +5,7 @@ import (
 	"work/controllers"
 	"work/db"
 	"work/models"
+	"work/session"
 
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -26,14 +27,21 @@ func main() {
 	router.Use(sessions.Sessions("mysession", store))
 
 	router.LoadHTMLGlob("view/*/**")
-	router.GET("/new", controllers.NewArticles)
+
+	auth := router.Group("/")
+	auth.Use(session.SessionCheck())
+	{
+		auth.GET("/new", controllers.NewArticles)
+		auth.GET("/edit/:id", controllers.EditArticles)
+		auth.GET("/logout", controllers.Logout)
+		auth.GET("/delete/:id", controllers.DeleteArticle)
+		auth.POST("/save", controllers.SaveArticles)
+	}
+
 	router.GET("/list", controllers.ListArticles)
 	router.GET("/view/:id", controllers.ViewArticles)
-	router.GET("/edit/:id", controllers.EditArticles)
-	router.GET("/delete/:id", controllers.DeleteArticle)
-	router.POST("/save", controllers.SaveArticles)
-	router.GET("/signin", controllers.SignInFormRoute)
-	router.POST("/signin", controllers.SignIn)
+	router.GET("/login", controllers.LoginFormRoute)
+	router.POST("/login", controllers.Login)
 	router.GET("/signup", controllers.SignUpFormRoute)
 	router.POST("/signup", controllers.SignUp)
 	err := router.Run(":8080")

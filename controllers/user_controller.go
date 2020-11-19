@@ -9,13 +9,14 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func SignInFormRoute(c *gin.Context) {
-	c.HTML(200, "signin.html", gin.H{})
+var user models.User
+
+func LoginFormRoute(c *gin.Context) {
+	c.HTML(200, "login.html", gin.H{})
 }
 
-func SignIn(c *gin.Context) {
+func Login(c *gin.Context) {
 
-	var user models.User
 	// バリデーション処理
 	if err := c.Bind(&user); err != nil {
 		log.Println("ログインできませんでした")
@@ -31,6 +32,11 @@ func SignIn(c *gin.Context) {
 		session.Login(c, user.Email)
 	}
 	c.Redirect(302, "/list")
+}
+
+func Logout(c *gin.Context) {
+	session.Logout(c)
+	c.Redirect(http.StatusMovedPermanently, "/login")
 }
 
 func SignUpFormRoute(c *gin.Context) {
