@@ -1,6 +1,6 @@
 # ベースとなるDockerイメージ指定
 FROM golang:latest
-RUN go get github.com/derekparker/delve/cmd/dlv \
+RUN go get github.com/go-delve/delve/cmd/dlv \
 && go get github.com/go-sql-driver/mysql
 
 # コンテナ内に作業ディレクトリを作成
